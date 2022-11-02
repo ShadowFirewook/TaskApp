@@ -26,11 +26,18 @@ class TaskFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.btnAdd.setOnClickListener{
+saveTask()
+        }
+    }
+    private fun saveTask(){
+        if (binding.etTitle.text?.isNotEmpty() == true){
             val task = Task(title = binding.etTitle.text.toString(),description = binding.etDescription.text.toString())
             setFragmentResult(
                 HomeFragment.TASK, bundleOf("task_key" to task)
             )
             findNavController().navigateUp()
+        }else{
+            binding.etTitle.error = "Заполните название"
         }
     }
 }
