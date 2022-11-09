@@ -12,7 +12,10 @@ import com.example.taskapp.R
 import com.example.taskapp.data.Task
 import com.example.taskapp.databinding.ItemTaskBinding
 
-class TaskAdapter(private val context: Context) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
+class TaskAdapter(private val context: Context,
+                  private val onLongClick: (task:Task) -> Unit,
+                  private val onClick: (task:Task) -> Unit)
+    : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
     private val tasks = arrayListOf<Task>()
 
@@ -42,6 +45,14 @@ class TaskAdapter(private val context: Context) : RecyclerView.Adapter<TaskAdapt
 
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         holder.bind()
+        holder.itemView.setOnLongClickListener{
+            onLongClick(tasks[position])
+            false
+        }
+        holder.itemView.setOnClickListener{
+            onClick(tasks[position])
+
+        }
     }
 
     override fun getItemCount(): Int {
@@ -51,6 +62,15 @@ class TaskAdapter(private val context: Context) : RecyclerView.Adapter<TaskAdapt
     fun addTask(task: Task){
         tasks.add(0,task)
         notifyItemChanged(0)
+    }
+
+    fun addTasks(list: List<Task>){
+        tasks.clear()
+        tasks.addAll(list)
+        notifyDataSetChanged()
+    }
+    fun getTask(position: Int):Task{
+      return  tasks[position]
     }
 
 }

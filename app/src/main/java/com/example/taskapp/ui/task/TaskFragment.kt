@@ -8,12 +8,14 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.setFragmentResult
 import androidx.navigation.fragment.findNavController
+import com.example.taskapp.App
 import com.example.taskapp.data.Task
 import com.example.taskapp.databinding.FragmentTaskBinding
 import com.example.taskapp.ui.home.HomeFragment
 
 class TaskFragment : Fragment() {
     private lateinit var binding: FragmentTaskBinding
+    private var isEmptyData = true
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -25,16 +27,43 @@ class TaskFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val task = arguments?.getSerializable(HomeFragment.TASK) as Task?
+
+        isEmptyData = task == null
+
+        if (isEmptyData){
+            binding.btnAdd.text = "add"
+        }else
+            binding.btnAdd.text = "update"
+
+        binding.etTitle.setText(task?.title)
+        binding.etDescription.setText(task?.description)
+
         binding.btnAdd.setOnClickListener{
-saveTask()
+
+            if (isEmptyData){
+                saveTask()
+            }else
+                updateTask(task)
+
         }
     }
-    private fun saveTask(){
+
+    private fun updateTask(task: Task?) {
+        if (binding.etTitle.text?.isNotEmpty() == true) {
+            task?.title = binding.etTitle.text.toString()
+            task?.description = binding.etDescription.text.toString()
+            if (task != null) {
+                App.db.dao().update(task)
+            }
+            findNavController().navigateUp()
+        }
+    }
+
+    fun saveTask(){
         if (binding.etTitle.text?.isNotEmpty() == true){
             val task = Task(title = binding.etTitle.text.toString(),description = binding.etDescription.text.toString())
-            setFragmentResult(
-                HomeFragment.TASK, bundleOf("task_key" to task)
-            )
+            App.db.dao().insert(task)
             findNavController().navigateUp()
         }else{
             binding.etTitle.error = "Заполните название"
